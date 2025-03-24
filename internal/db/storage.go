@@ -1,6 +1,6 @@
 package db
 
-import "kv-storage/internal/models"
+import "github.com/MosinFAM/tarantool-kv/internal/models"
 
 type Storage interface {
 	Create(in *models.KeyValue) (*models.KeyValue, error)
