@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    container_name: app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tarantool
+    environment:
+      - TARANTOOL_HOST=tarantool
+      - TARANTOOL_PORT=3301
+
+  tarantool:
+    image: tarantool/tarantool:latest
+    container_name: tarantool
+    ports:
+      - "3301:3301"
+    restart: always
+    command: tarantool /opt/tarantool/init.lua
+    volumes:
+      - ../init.lua:/opt/tarantool/init.lua
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "3301" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
