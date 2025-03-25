@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tarantool/go-tarantool v1.12.2
+	go.uber.org/mock v0.5.0
 )
 
 require (
