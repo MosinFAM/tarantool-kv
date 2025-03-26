@@ -37,3 +37,35 @@ docker compose -f build/docker-compose.yml up -d --build
 - PUT, GET, DELETE возвращает 404 если такого ключа нет
 
 - все операции логируются
+
+
+## примеры запросов
+
+Получение
+
+```bash
+curl -X GET "http://localhost:8080/kv/test"   
+```
+
+Отправка 
+
+```bash
+curl -X POST "http://localhost:8080/kv" \                              
+     -H "Content-Type: application/json" \
+     -d '{"key": "test", "value": {"1": "1"}}'
+```
+
+Изменение 
+
+```bash
+curl -X PUT "http://localhost:8080/kv/test" \                          
+     -H "Content-Type: application/json" \
+     -d '{"value": {"2": "2"}}'
+
+```
+
+Удаление 
+
+```bash
+curl -X DELETE "http://localhost:8080/kv/test"     
+```
