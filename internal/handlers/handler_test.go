@@ -13,6 +13,7 @@ import (
 	"github.com/MosinFAM/tarantool-kv/internal/logger"
 	"github.com/MosinFAM/tarantool-kv/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"go.uber.org/mock/gomock"
 )
 
@@ -53,10 +54,13 @@ func TestCreateKeyValue_Success(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	requestBody, _ := json.Marshal(validRequest)
+	requestBody, err := json.Marshal(validRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": validRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
-	t.Logf("Request body: %s", requestBody) // Логируем тело запроса
+	t.Logf("Request body: %s", requestBody)
 	h.CreateKeyValue(c)
 
 	if w.Code != http.StatusOK {
@@ -77,7 +81,10 @@ func TestCreateKeyValue_Conflict(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	requestBody, _ := json.Marshal(validRequest)
+	requestBody, err := json.Marshal(validRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": validRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -143,7 +150,10 @@ func TestUpdateKeyValue_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = []gin.Param{{Key: "id", Value: "testKey"}}
-	requestBody, _ := json.Marshal(validRequest)
+	requestBody, err := json.Marshal(validRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": validRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPut, "/testKey", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -163,7 +173,10 @@ func TestUpdateKeyValue_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = []gin.Param{{Key: "id", Value: "missingKey"}}
-	requestBody, _ := json.Marshal(models.KeyValue{Key: "missingKey", Value: map[string]interface{}{"data": "newValue"}})
+	requestBody, err := json.Marshal(models.KeyValue{Key: "missingKey", Value: map[string]interface{}{"data": "newValue"}})
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{})
+	}
 	c.Request = httptest.NewRequest(http.MethodPut, "/missingKey", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -184,7 +197,6 @@ func TestDeleteKeyValue_Success(t *testing.T) {
 		Value: map[string]interface{}{"data": "testValue"},
 	}
 
-	// Ожидаем вызов Delete с аргументом validKey и возвращаем успешный результат
 	mockStorage.EXPECT().Delete(validKey).Return(&validRequest, nil)
 
 	w := httptest.NewRecorder()
@@ -205,7 +217,6 @@ func TestDeleteKeyValue_NotFound(t *testing.T) {
 
 	invalidKey := "missingKey"
 
-	// Ожидаем вызов Delete с аргументом invalidKey и возвращаем ошибку
 	mockStorage.EXPECT().Delete(invalidKey).Return(nil, errors.New("key not found"))
 
 	w := httptest.NewRecorder()
@@ -225,7 +236,7 @@ func TestCreateKeyValue_InvalidBody(t *testing.T) {
 	defer ctrl.Finish()
 
 	// Некорректный JSON в теле запроса
-	invalidJSON := `{"key": "testKey", "value": }` // Ошибка в JSON
+	invalidJSON := `{"key": "testKey", "value": }`
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -260,7 +271,10 @@ func TestCreateKeyValue_MissingKey(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	requestBody, _ := json.Marshal(invalidRequest)
+	requestBody, err := json.Marshal(invalidRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": invalidRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -293,7 +307,10 @@ func TestCreateKeyValue_EmptyValue(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	requestBody, _ := json.Marshal(invalidRequest)
+	requestBody, err := json.Marshal(invalidRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": invalidRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -329,7 +346,10 @@ func TestCreateKeyValue_InternalServerError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	requestBody, _ := json.Marshal(validRequest)
+	requestBody, err := json.Marshal(validRequest)
+	if err != nil {
+		logger.LogError("Data serialization failed during update", err, logrus.Fields{"request": validRequest})
+	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(requestBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -356,7 +376,7 @@ func TestCreateKeyValue_InvalidBody2(t *testing.T) {
 	defer ctrl.Finish()
 
 	// Некорректный JSON в теле запроса
-	invalidJSON := `{"key": "testKey", "value": }` // Ошибка в JSON
+	invalidJSON := `{"key": "testKey", "value": }`
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
